@@ -302,5 +302,39 @@ namespace CompositeImages
 			// the dataflow network will respond to the cancellation request.
 			cancellationTokenSource.Cancel();
 		}
-	}
+
+        private void buttonSaveAs_Click(object sender, EventArgs e)
+        {
+            // Displays a SaveFileDialog so the user can save the Image  
+            // assigned to Button2.  
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog()
+            {
+                Filter = "JPeg Image|*.jpg|Bitmap Image|*.bmp",
+                Title = "Save an Image File"
+            };
+            saveFileDialog1.ShowDialog();
+
+            // If the file name is not an empty string open it for saving.  
+            if (saveFileDialog1.FileName != "")
+            {
+                // Saves the Image via a FileStream created by the OpenFile method.  
+                var fs = (FileStream)saveFileDialog1.OpenFile();
+                // Saves the Image in the appropriate ImageFormat based upon the  
+                // File type selected in the dialog box.  
+                // NOTE that the FilterIndex property is one-based.  
+                switch (saveFileDialog1.FilterIndex)
+                {
+                    case 1:
+                        pictureBox1.Image.Save(fs, ImageFormat.Jpeg);
+                        break;
+
+                    case 2:
+                        pictureBox1.Image.Save(fs, ImageFormat.Bmp);
+                        break;
+                }
+
+                fs.Close();
+            }
+        }
+    }
 }
