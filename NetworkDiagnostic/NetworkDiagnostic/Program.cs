@@ -57,6 +57,12 @@ namespace NetworkDiagnostic
                     }
                 }
             }
+            else
+            {
+                Console.WriteLine("No network is available to test.\n");
+            }
+
+            Console.WriteLine("Tests complete.");
         }
 
         private static IPAddress GetDefaultGateway()
@@ -87,6 +93,10 @@ namespace NetworkDiagnostic
 
                 response = true;
             }
+            else
+            {
+                Console.WriteLine($"Ping to {destination.ToString()} timed out.");
+            }
 
             Console.WriteLine();
 
@@ -110,6 +120,10 @@ namespace NetworkDiagnostic
                 Console.WriteLine($"\tRoundTripTime: {reply.Result.RoundtripTime}ms");
 
                 response = true;
+            }
+            else
+            {
+                Console.WriteLine($"Ping to {destination} timed out.");
             }
 
             Console.WriteLine();
