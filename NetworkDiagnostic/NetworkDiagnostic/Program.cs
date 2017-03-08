@@ -16,21 +16,47 @@ namespace NetworkDiagnostic
 
         private static void StandardTests()
         {
-            var host = Dns.GetHostEntryAsync(Dns.GetHostName());
+            var ok = true;
 
+            var host = Dns.GetHostEntryAsync(Dns.GetHostName());
+            
             foreach (var ip in host.Result.AddressList)
             {
                 if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                 {
-                    PingAddress(ip);
+                    if (!PingAddress(ip, 10))
+                    {
+                        ok = false;
+                    }
                 }
             }
+            
+            if (NetworkInterface.GetIsNetworkAvailable())
+            {
+                if (ok)
+                {
+                    if (!PingAddress(GetDefaultGateway(), 100))
+                    {
+                        ok = false;
+                    }
+                }
 
-            PingAddress(GetDefaultGateway());
+                if (ok)
+                {
+                    if (!PingAddress(IPAddress.Parse("8.8.8.8"), 1000))
+                    {
+                        ok = false;
+                    }
+                }
 
-            PingAddress(IPAddress.Parse("8.8.8.8"));
-
-            PingAddress("www.google.com");
+                if (ok)
+                {
+                    if (!PingAddress("www.google.com", 2000))
+                    {
+                        ok = false;
+                    }
+                }
+            }
         }
 
         private static IPAddress GetDefaultGateway()
@@ -43,40 +69,52 @@ namespace NetworkDiagnostic
             return gateway.GetIPProperties().GatewayAddresses.FirstOrDefault().Address;
         }
 
-        private static void PingAddress(IPAddress destination)
+        private static bool PingAddress(IPAddress destination, int timeout)
         {
+            var response = false;
+
             Ping pingSender = InitializePing();
 
             Console.WriteLine($"Pinging {destination.ToString()}...");
 
-            var reply = pingSender.SendPingAsync(destination);
+            var reply = pingSender.SendPingAsync(destination, timeout);
 
             if (reply.Result.Status == IPStatus.Success)
             {
                 Console.WriteLine($"Ping to {destination.ToString()} successful!");
 
                 Console.WriteLine($"\tRoundTripTime: {reply.Result.RoundtripTime}ms");
+
+                response = true;
             }
 
             Console.WriteLine();
+
+            return response;
         }
 
-        private static void PingAddress(string destination)
+        private static bool PingAddress(string destination, int timeout)
         {
+            var response = false;
+
             Ping pingSender = InitializePing();
 
             Console.WriteLine($"Pinging {destination}...");
 
-            var reply = pingSender.SendPingAsync(destination);
+            var reply = pingSender.SendPingAsync(destination, timeout);
 
             if (reply.Result.Status == IPStatus.Success)
             {
                 Console.WriteLine($"Ping to {destination} successful!");
 
                 Console.WriteLine($"\tRoundTripTime: {reply.Result.RoundtripTime}ms");
+
+                response = true;
             }
 
             Console.WriteLine();
+
+            return response;
         }
 
         private static Ping InitializePing()
